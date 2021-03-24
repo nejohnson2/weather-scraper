@@ -19,33 +19,29 @@ def scraper(start_date, end_date):
 
         url = base_url.format(str(date.date()))
         
-        r = render_page(url)
+        try:
+            r = render_page(url)
         
-        soup = BS(r, "html.parser")
-        container = soup.find('lib-city-history-observation')
-        check = container.find('tbody')
+            soup = BS(r, "html.parser")
+            container = soup.find('lib-city-history-observation')
+            check = container.find('tbody')
 
-        df = []
-        for c in check.find_all('tr', class_='ng-star-inserted'):
-            for i in c.find_all('td', class_='ng-star-inserted'):
-                trial = i.text
-                trial = trial.strip('  ')
-                df.append(trial)
-        
-        if len(df) == 240:
-            data = pd.DataFrame(np.array(df).reshape(24,10))
-            data['date'] = date        
-            fdata.append(data)
-        elif len(df) == 250:
-            data = pd.DataFrame(np.array(df).reshape(25,10))
+            df = []
+            for c in check.find_all('tr', class_='ng-star-inserted'):
+                for i in c.find_all('td', class_='ng-star-inserted'):
+                    trial = i.text
+                    trial = trial.strip('  ')
+                    df.append(trial)
+
+            s = int(len(df) / 10)
+
+            data = pd.DataFrame(np.array(df).reshape(s,10))
             data['date'] = date
             fdata.append(data)
-        elif len(df) == 260:
-            data = pd.DataFrame(np.array(df).reshape(26,10))
-            data['date'] = date
-            fdata.append(data)
-        else:
-            print("bad data: {}, {}".format(date, len(df)))
+            
+        except:
+            print("Error: {}".format(date))
+            pass
         
     return fdata
   
